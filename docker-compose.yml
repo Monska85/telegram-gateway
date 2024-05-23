@@ -1,0 +1,11 @@
+services:
+  telegram-gateway:
+    image: ghcr.io/monska85/telegram-gateway:latest
+    restart: 'unless-stopped'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

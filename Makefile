@@ -1,0 +1,34 @@
+IMAGE_NAME ?= telegram-gateway
+IMAGE_TAG ?= loc
+HOST=telegram-gateway.loc
+# Keep in sync with .env
+PORT ?= 8080
+
+all: run
+
+build:
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+run: build
+	docker run --rm \
+		--env-file .env \
+		-e VIRTUAL_HOST=$(HOST) \
+		-e VIRTUAL_PORT=$(PORT) \
+		-v $(PWD)/config.yaml:/etc/config.yaml \
+	$(IMAGE_NAME):$(IMAGE_TAG)
+
+send-message:
+	@if [ -z "$(CHAT_ID)" ]; then echo "CHAT_ID is not set"; exit 1; fi
+	@if [ -z "$(MESSAGE)" ]; then echo "MESSAGE is not set"; exit 1; fi
+	curl -X POST http://$(HOST)/sendmessage --data '{"chat_id":$(CHAT_ID),"text":"$(MESSAGE)"}'
+
+send-image-message:
+	@if [ -z "$(CHAT_ID)" ]; then echo "CHAT_ID is not set"; exit 1; fi
+	@if [ -z "$(MESSAGE)" ]; then echo "MESSAGE is not set"; exit 1; fi
+
+	@CHAT_ID="$(CHAT_ID)" \
+		MESSAGE="$(MESSAGE)" \
+		IMAGE_NAME="1280x1024_DEBIAN.png" \
+		envsubst <data.json.tpl >data.json
+	curl -X POST http://$(HOST)/sendmessage --data @data.json
+	@rm -f data.json

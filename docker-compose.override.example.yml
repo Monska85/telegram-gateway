@@ -1,0 +1,14 @@
+services:
+  telegram-gateway:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.telegram-gateway.rule=Host(`PUT_VIRUAL_HOST_HERE`)"
+      - "traefik.http.routers.telegram-gateway.entrypoints=websecure"
+      - "traefik.http.routers.telegram-gateway.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.telegram-gateway.service=telegram-gateway"
+      - "traefik.http.services.telegram-gateway.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.telegram-gateway-ipallowlist.ipallowlist.sourcerange=127.0.0.1/32, YOUR_PRIVATE_IPS"
+      - "traefik.http.middlewares.telegram-gateway-redirectscheme.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.telegram-gateway-redirectscheme.redirectscheme.permanent=true"
+      - "traefik.http.routers.telegram-gateway.middlewares=telegram-gateway-ipallowlist@docker"
+      - "traefik.http.routers.telegram-gateway.middlewares=telegram-gateway-redirectscheme@docker"
